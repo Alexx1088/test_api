@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\AuthController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -50,9 +50,20 @@ Route::group(['middleware' => ['jwt.verify']], function () {
 });
 
 
-Route::post('reg_user', [\App\Http\Controllers\Api\UserController::class, 'index',]);
+/*Route::post('reg_user', [\App\Http\Controllers\Api\UserController::class, 'index',]);
 Route::get('reg_user/{id}', [\App\Http\Controllers\Api\UserController::class, 'userById']);
 Route::post('reg_user', [\App\Http\Controllers\Api\UserController::class, 'userSave']);
 
 
-Route::post('reg1_user', [\App\Http\Controllers\Auth\RegisterController::class, 'create',]);
+Route::post('reg1_user', [\App\Http\Controllers\Auth\RegisterController::class,
+ 'create',]);*/
+
+Route::controller(AuthController::class)->group(function () {
+    Route::post('login', 'login');
+    Route::post('register', 'register');
+    Route::post('logout', 'logout');
+    Route::post('refresh', 'refresh');
+    Route::put('update', 'userUpdate');
+    Route::get('me', 'me');
+
+});
