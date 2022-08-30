@@ -47,5 +47,12 @@ Route::group(['middleware' => ['jwt.verify']], function () {
     Route::delete('country/{id}', [\App\Http\Controllers\Api\Country\CountryController::class,
         'countryDelete']);
 
-
 });
+
+
+Route::post('reg_user', [\App\Http\Controllers\Api\UserController::class, 'index',]);
+Route::get('reg_user/{id}', [\App\Http\Controllers\Api\UserController::class, 'userById']);
+Route::post('reg_user', [\App\Http\Controllers\Api\UserController::class, 'userSave']);
+
+
+Route::post('reg1_user', [\App\Http\Controllers\Auth\RegisterController::class, 'create',]);
