@@ -13,46 +13,58 @@ use Tymon\JWTAuth\Exceptions\UserNotDefinedException;
 class AuthController extends Controller
 {
 
-    public function __construct()
-    {
-        $this->middleware('auth:api', ['except' => ['login','register']]);
-    }
+    /* public function __construct()
+     {
+         $this->middleware('auth:api', ['except' => ['login','register']]);
+     }*/
 
     public function login(Request $request)
     {
-        $statuses = User::all();
-        foreach ($statuses as $status) {
-            if ($status->status === 'active') {
+        $login_email = $request->email;
+
+        $users = User::all();
+
+        foreach ($users as $user) {
+
+            if ($user->status === 'active' && $user->email === $login_email) {
+
+                $request->validate([
+                    'email' => 'required|string|email',
+                    'password' => 'required|string',
+                ]);
+                $credentials = $request->only('email', 'password');
+
+                $token = Auth::attempt($credentials);
+                if (!$token) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Unauthorized',
+                    ], 401);
+                }
+
+                $user = Auth::user();
+                return response()->json([
+                    'status' => 'success',
+                    'user' => $user,
+                    'authorisation' => [
+                        'token' => $token,
+                        'type' => 'bearer',
+                    ]
+                ]);
 
             }
+            if ($user->status === !'active' || $user->email === !$login_email) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'User is unauthorized',
+                ], 404);
+            }
         }
-        $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
-        ]);
-        $credentials = $request->only('email', 'password');
-
-        $token = Auth::attempt($credentials);
-        if (!$token) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Unauthorized',
-            ], 401);
-        }
-
-        $user = Auth::user();
-        return response()->json([
-            'status' => 'success',
-            'user' => $user,
-            'authorisation' => [
-                'token' => $token,
-                'type' => 'bearer',
-            ]
-        ]);
 
     }
 
-    public function register(Request $request){
+    public function register(Request $request)
+    {
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -111,18 +123,14 @@ class AuthController extends Controller
         ]);
     }
 
-    public function userUpdate(Request $request, $id)
+    public function update(Request $request, $id)
     {
-        try {
-            $user = auth()->userOrFail();
-        } catch (UserNotDefinedException $e) {
-            return response()->json(['error' => true, 'message' => $e->getMessage()],
-                401);
-        }
+        Auth::user();
         $rules = [
-          //  'alias' => 'required|min:2|max:2',
-            'name' => 'required|min:3',
-            'name_en' => 'required|min:3',
+            'patronymic' => 'required|min:1|max:20',
+            'name' => 'required|min:1|max:20',
+            'surname' => 'required|min:3|max:20',
+            'itn' => 'required|digits:12',
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -140,7 +148,6 @@ class AuthController extends Controller
         $user->update($request->all());
 
         return response()->json($user, 200);
-
     }
 
 }

@@ -32,7 +32,7 @@ Route::get('country/{id}', [\App\Http\Controllers\Api\Country\CountryController
 /*Route::delete('country/{id}', [\App\Http\Controllers\Api\Country\CountryController::class,
     'countryDelete']);*/
 
-Route::post('login', [\App\Http\Controllers\Api\Auth\LoginController::class, 'login']);
+//Route::post('login', [\App\Http\Controllers\Api\Auth\LoginController::class, 'login']);
 
 //Route::get('refresh', [\App\Http\Controllers\Api\Auth\LoginController::class,
 // 'refresh']);
@@ -46,24 +46,20 @@ Route::group(['middleware' => ['jwt.verify']], function () {
         'countryEdit']);
     Route::delete('country/{id}', [\App\Http\Controllers\Api\Country\CountryController::class,
         'countryDelete']);
-
 });
-
-
-/*Route::post('reg_user', [\App\Http\Controllers\Api\UserController::class, 'index',]);
-Route::get('reg_user/{id}', [\App\Http\Controllers\Api\UserController::class, 'userById']);
-Route::post('reg_user', [\App\Http\Controllers\Api\UserController::class, 'userSave']);
-
-
-Route::post('reg1_user', [\App\Http\Controllers\Auth\RegisterController::class,
- 'create',]);*/
 
 Route::controller(AuthController::class)->group(function () {
     Route::post('login', 'login');
     Route::post('register', 'register');
     Route::post('logout', 'logout');
     Route::post('refresh', 'refresh');
-    Route::put('update', 'userUpdate');
+    Route::put('update/{id}', 'update');
     Route::get('me', 'me');
 
 });
+
+Route::group(['middleware' => ['auth', 'admin']], function() {
+    Route::get('/admin', [\App\Http\Controllers\AdminController::class, 'index']);
+});
+
+
